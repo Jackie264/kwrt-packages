@@ -40,7 +40,7 @@ ha_sync_send() {
 	config_get ssh_port "$cfg" ssh_port 22
 	config_get sync_dir "$cfg" sync_dir "$RSYNC_HOME"
 	[ -z "$sync_dir" ] && return 0
-	config_get ssh_key "$cfg" ssh_key "$sync_dir"/.ssh/id_rsa
+	config_get ssh_key "$cfg" ssh_key "$sync_dir"/.ssh/id_dropbear
 	config_get sync_list "$cfg" sync_list
 
 	for sync_file in $sync_list $(sysupgrade -l); do
