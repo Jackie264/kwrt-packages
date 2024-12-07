@@ -545,7 +545,33 @@ return view.extend({
 		o.datatype = 'file';
 		o.rmempty = false;
 		o.modalonly = true;
+		o.default = '/etc/natmap/notify/ntfy'; // Ensure "ntfy" is default
 
+		o._node.onchange = function () {
+    		var selected = this.value;
+    		var showFields = (selected === '/etc/natmap/notify/ntfy');
+    		o_priority.hidden = !showFields; // Toggle Priority visibility
+    		o_tag.hidden = !showFields;     // Toggle Tag visibility
+		};
+
+		// Add Priority input field
+		var o_priority = s.taboption('notify', form.Value, 'notify_priority', _('HTTP header option: Priority'));
+		o_priority.datatype = 'uinteger'; // Ensure the input is an unsigned integer
+		o_priority.placeholder = '3';    // Default priority
+		o_priority.rmempty = true;
+		o_priority.modalonly = true;
+		o_priority.description = _('Priority level (default 3).');
+		o_priority.hidden = true;       // Initially hidden
+
+		// Add Tag input field
+		var o_tag = s.taboption('notify', form.Value, 'notify_tag', _('HTTP header option: Tag'));
+		o_tag.datatype = 'string';
+		o_tag.placeholder = 'postbox';  // Default tag
+		o_tag.rmempty = true;
+		o_tag.modalonly = true;
+		o_tag.description = _('Tag for the notification (default "postbox").');
+		o_tag.hidden = true;            // Initially hidden
+		
 		if (scripts_notify.length) {
 			for (var i = 0; i < scripts_notify.length; i++)
 				o.value(etc_path + '/notify/' + scripts_notify[i].name, scripts_notify[i].name);
