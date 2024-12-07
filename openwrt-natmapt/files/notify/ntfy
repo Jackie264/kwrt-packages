@@ -23,6 +23,11 @@ start() {
 	json_add_string topic "${TOPIC}"
 	json_add_string message "${text}"
 	json_add_string title "${TITLE}"
+
+	# Add priority option (-H p:3) and tag option (-H ta:postbox)
+	json_add_string p "${P:-3}"
+	json_add_string ta "${TA:-postbox}"
+
 	[ -n "${WACTION}" ] && {
 		json_add_array actions
 			json_add_object
