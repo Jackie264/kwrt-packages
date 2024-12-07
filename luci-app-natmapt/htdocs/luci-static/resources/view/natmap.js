@@ -566,6 +566,10 @@ return view.extend({
 		o.rmempty = true;
 		o.modalonly = true;
 		o.description = _('Tag for the notification (default "postbox").');
+
+		// Initially hide the Priority and Tag fields
+		o_priority.hidden = true;
+		o_tag.hidden = true;
 		
 		o = s.taboption('notify', form.DynamicList, 'notify_tokens', _('Tokens'),
 			_('The KEY required by the script above. ' +
@@ -588,6 +592,18 @@ return view.extend({
 		o.rmempty = true;
 		o.modalonly = true;
 
+		// Listen for changes in the notify_script field
+		o.script.onchange = function() {
+    			// Check if 'ntfy' script is selected
+    			if (this.value == 'ntfy') {
+        			o_priority.hidden = false; // Show Priority input
+        			o_tag.hidden = false; // Show Tag input
+    			} else {
+        			o_priority.hidden = true; // Hide Priority input
+        			o_tag.hidden = true; // Hide Tag input
+    			}
+		};
+		
 		o = s.taboption('ddns', form.Flag, 'ddns_enable', _('EnDDNS'));
 		o.default = o.disabled;
 		o.editable = true;
