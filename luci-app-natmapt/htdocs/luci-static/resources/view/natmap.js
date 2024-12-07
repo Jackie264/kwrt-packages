@@ -550,27 +550,7 @@ return view.extend({
 			for (var i = 0; i < scripts_notify.length; i++)
 				o.value(etc_path + '/notify/' + scripts_notify[i].name, scripts_notify[i].name);
 		};
-		
-		// Add Priority input field
-		o = s.taboption('notify', form.Value, 'notify_priority', _('HTTP header option: Priority'));
-		o.datatype = 'uinteger';  // Ensure the input is an unsigned integer
-		o.placeholder = '3';  // Default priority
-		o.rmempty = true;
-		o.modalonly = true;
-		o.description = _('Priority level (default 3).');
 
-		// Add Tag input field
-		o = s.taboption('notify', form.Value, 'notify_tag', _('HTTP header option: Tag'));
-		o.datatype = 'string';
-		o.placeholder = 'postbox';  // Default tag
-		o.rmempty = true;
-		o.modalonly = true;
-		o.description = _('Tag for the notification (default "postbox").');
-
-		// Initially hide the Priority and Tag fields
-		o_priority.hidden = true;
-		o_tag.hidden = true;
-		
 		o = s.taboption('notify', form.DynamicList, 'notify_tokens', _('Tokens'),
 			_('The KEY required by the script above. ' +
 				'See <a href="%s" target="_blank">%s</a> for the format of KEY required by each script. ' +
@@ -591,18 +571,6 @@ return view.extend({
 		o.placeholder = 'NATMap: <comment>: [<protocol>] <inner_ip>:<inner_port> -> <ip>:<port>';
 		o.rmempty = true;
 		o.modalonly = true;
-
-		// Listen for changes in the notify_script field
-		o.script.onchange = function() {
-    			// Check if 'ntfy' script is selected
-    			if (this.value == 'ntfy') {
-        			o_priority.hidden = false; // Show Priority input
-        			o_tag.hidden = false; // Show Tag input
-    			} else {
-        			o_priority.hidden = true; // Hide Priority input
-        			o_tag.hidden = true; // Hide Tag input
-    			}
-		};
 		
 		o = s.taboption('ddns', form.Flag, 'ddns_enable', _('EnDDNS'));
 		o.default = o.disabled;
