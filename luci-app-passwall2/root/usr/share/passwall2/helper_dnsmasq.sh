@@ -35,6 +35,9 @@ restore_servers() {
 }
 
 logic_restart() {
+	# load keepalived_check.sh
+	../keepalived/keepalived_check.sh || true
+ 
 	local no_log
 	eval_set_val $@
 	_LOG_FILE=$LOG_FILE
