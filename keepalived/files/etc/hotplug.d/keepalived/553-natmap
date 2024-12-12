@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# shellcheck source=/dev/null
+. /lib/functions/keepalived/hotplug.sh
+
+set_service_name natmap
+
+# set_skip_running_check
+set_reload_if_master
+set_stop_if_backup
+
+add_sync_file /etc/config/firewall
+
+logger -t keepalived "Hotplug script for natmap triggered with ACTION=$ACTION"
+
+keepalived_hotplug
+logger -t keepalived "Hotplug script for natmap completed"
