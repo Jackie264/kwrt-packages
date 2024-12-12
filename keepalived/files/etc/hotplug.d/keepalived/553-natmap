@@ -5,11 +5,11 @@
 
 set_service_name natmap
 
-# set_skip_running_check
+set_skip_running_check
 set_reload_if_master
 set_stop_if_backup
 
-add_sync_file /etc/config/firewall
+add_sync_file /etc/config/natmap
 
 logger -t keepalived "Hotplug script for natmap triggered with ACTION=$ACTION"
 
