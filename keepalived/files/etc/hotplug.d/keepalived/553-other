@@ -8,12 +8,12 @@ case "$KEEPALIVED_STATE" in
     MASTER)
         echo "Keepalived state is MASTER, executing other_service_check.sh"
         logger "Keepalived state is MASTER, executing other_service_check.sh"
-        /path/to/other_service_check.sh MASTER
+        /usr/share/keepalived/scripts/other_service_check.sh MASTER
         ;;
     BACKUP)
         echo "Keepalived state is BACKUP, executing other_service_check.sh"
         logger "Keepalived state is BACKUP, executing other_service_check.sh"
-        /path/to/other_service_check.sh BACKUP
+        /usr/share/keepalived/scripts/other_service_check.sh BACKUP
         ;;
     *)
         echo "Unknown Keepalived state: $KEEPALIVED_STATE"
