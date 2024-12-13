@@ -11,12 +11,12 @@ case "$ACTION" in
     NOTIFY_MASTER)
         echo "Keepalived state is MASTER, executing other_service_check.sh"
         logger "Keepalived state is MASTER, executing other_service_check.sh"
-        /path/to/other_service_check.sh "$ACTION"
+        /etc/hotplug.d/keepalived/other_service_check.sh "$ACTION"
         ;;
     NOTIFY_BACKUP)
         echo "Keepalived state is BACKUP, executing other_service_check.sh"
         logger "Keepalived state is BACKUP, executing other_service_check.sh"
-        /path/to/other_service_check.sh "$ACTION"
+        /etc/hotplug.d/keepalived/other_service_check.sh "$ACTION"
         ;;
     *)
         echo "Unknown Keepalived action: $ACTION"
