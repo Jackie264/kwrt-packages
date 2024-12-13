@@ -4,6 +4,16 @@
 echo "Running other_service_check.sh at $(date)"
 logger "Running other_service_check.sh at $(date)"
 
+# Check if natmap is installed
+check_natmap_installed() {
+    if ! [ -x "/etc/init.d/natmap" ]; then
+        echo "natmap service is not installed, skipping natmap control"
+        logger "natmap service is not installed, skipping natmap control"
+        return 1
+    fi
+    return 0
+}
+
 # Reload odhcpd if necessary
 reload_odhcpd_if_needed() {
     if [ "$1" = true ]; then
@@ -16,9 +26,14 @@ reload_odhcpd_if_needed() {
 # Reload natmap if necessary
 reload_natmap_if_needed() {
     if [ "$1" = true ]; then
-        echo "Reloading natmap service"
-        logger "Reloading natmap service"
-        /etc/init.d/natmap reload
+        if check_natmap_installed; then
+            echo "Reloading natmap service"
+            logger "Reloading natmap service"
+            /etc/init.d/natmap reload
+        else
+            echo "Cannot reload natmap: service not installed"
+            logger "Cannot reload natmap: service not installed"
+        fi
     fi
 }
 
