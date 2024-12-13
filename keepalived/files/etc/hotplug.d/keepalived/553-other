@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# shellcheck source=/dev/null
+. /lib/functions/keepalived/hotplug.sh
+
+# 调用您的 other_service_check.sh 脚本，根据 Keepalived 的状态调整服务
+case "$KEEPALIVED_STATE" in
+    MASTER)
+        echo "Keepalived state is MASTER, executing other_service_check.sh"
+        logger "Keepalived state is MASTER, executing other_service_check.sh"
+        /path/to/other_service_check.sh MASTER
+        ;;
+    BACKUP)
+        echo "Keepalived state is BACKUP, executing other_service_check.sh"
+        logger "Keepalived state is BACKUP, executing other_service_check.sh"
+        /path/to/other_service_check.sh BACKUP
+        ;;
+    *)
+        echo "Unknown Keepalived state: $KEEPALIVED_STATE"
+        logger "Unknown Keepalived state: $KEEPALIVED_STATE"
+        ;;
+esac
