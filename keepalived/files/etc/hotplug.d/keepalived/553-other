@@ -3,20 +3,23 @@
 # shellcheck source=/dev/null
 . /lib/functions/keepalived/hotplug.sh
 
-# 调用您的 other_service_check.sh 脚本，根据 Keepalived 的状态调整服务
-case "$KEEPALIVED_STATE" in
-    MASTER)
+# 记录所有环境变量，便于调试
+env > /tmp/keepalived_hotplug_env.log
+
+# 使用 ACTION 来判断状态
+case "$ACTION" in
+    NOTIFY_MASTER)
         echo "Keepalived state is MASTER, executing other_service_check.sh"
         logger "Keepalived state is MASTER, executing other_service_check.sh"
-        /usr/share/keepalived/scripts/other_service_check.sh MASTER
+        /path/to/other_service_check.sh MASTER
         ;;
-    BACKUP)
+    NOTIFY_BACKUP)
         echo "Keepalived state is BACKUP, executing other_service_check.sh"
         logger "Keepalived state is BACKUP, executing other_service_check.sh"
-        /usr/share/keepalived/scripts/other_service_check.sh BACKUP
+        /path/to/other_service_check.sh BACKUP
         ;;
     *)
-        echo "Unknown Keepalived state: $KEEPALIVED_STATE"
-        logger "Unknown Keepalived state: $KEEPALIVED_STATE"
+        echo "Unknown Keepalived action: $ACTION"
+        logger "Unknown Keepalived action: $ACTION"
         ;;
 esac
