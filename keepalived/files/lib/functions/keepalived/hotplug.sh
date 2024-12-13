@@ -210,7 +210,8 @@ _notify_backup() {
 		_stop_service
 	elif backup_and_reload; then
 		log_debug "restart service $SERVICE_NAME"
-		_restart_service
+		# _restart_service
+  		_reload_service
 	fi
 }
 
