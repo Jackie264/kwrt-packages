@@ -60,13 +60,13 @@ check_and_update() {
 # Update services based on Keepalived state
 update_services() {
     local state="$1"
-    echo "Detected Keepalived state: $state"
-    logger "Detected Keepalived state: $state"
+    echo "Detected Keepalived state: $action"
+    logger "Detected Keepalived state: $action"
 
     reload_odhcpd=false
     reload_natmap=false
 
-    if [ "$state" = "MASTER" ]; then
+    if [ "$action" = "MASTER" ]; then
         echo "Keepalived state is MASTER, enabling services"
         logger "Keepalived state is MASTER, enabling services"
 
@@ -78,7 +78,7 @@ update_services() {
         check_and_update "dhcp.lan.ra" "server" && reload_odhcpd=true
         check_and_update "dhcp.lan.ndp" "relay" && reload_odhcpd=true
 
-    elif [ "$state" = "BACKUP" ]; then
+    elif [ "$action" = "BACKUP" ]; then
         echo "Keepalived state is BACKUP, disabling services"
         logger "Keepalived state is BACKUP, disabling services"
 
@@ -90,8 +90,8 @@ update_services() {
         check_and_update "dhcp.lan.ra" "disabled" && reload_odhcpd=true
         check_and_update "dhcp.lan.ndp" "disabled" && reload_odhcpd=true
     else
-        echo "Unknown Keepalived state: $state, skipping service adjustments"
-        logger "Unknown Keepalived state: $state, skipping service adjustments"
+        echo "Unknown Keepalived state: $action, skipping service adjustments"
+        logger "Unknown Keepalived state: $action, skipping service adjustments"
     fi
 
     # Apply necessary actions
