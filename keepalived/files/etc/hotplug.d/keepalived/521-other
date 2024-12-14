@@ -1,0 +1,95 @@
+#!/bin/sh
+
+# shellcheck source=/dev/null
+. /lib/functions/keepalived/hotplug.sh
+
+set_service_name 521-other
+
+logger -t keepalived "Running other_service_check at $(date)"
+
+# Check if natmap is installed
+check_natmap_installed() {
+    if ! command -v natmap &>/dev/null; then
+        logger -t keepalived "natmap service is not installed, skipping natmap control"
+        return 1
+    fi
+    return 0
+}
+
+# Reload odhcpd if necessary
+reload_odhcpd_if_needed() {
+    if [ "$1" = true ]; then
+        /etc/init.d/odhcpd reload || logger -t keepalived "Failed to reload odhcpd"
+    fi
+}
+
+# Reload natmap if necessary
+reload_natmap_if_needed() {
+    if [ "$1" = true ]; then
+        if check_natmap_installed; then
+            /etc/init.d/natmap reload || logger -t keepalived "Failed to reload natmap"
+        fi
+    fi
+}
+
+# Check and update UCI settings
+check_and_update() {
+    local config_key=$1
+    local target_value=$2
+    local current_value
+    current_value=$(uci get "$config_key" 2>/dev/null)
+
+    if [ "$current_value" = "$target_value" ]; then
+        return 1
+    else
+        uci set "$config_key=$target_value" && uci commit "${config_key%%.*}" || {
+            logger -t keepalived "Failed to update $config_key"
+            return 1
+        }
+        logger -t keepalived "Updated $config_key to $target_value"
+        return 0
+    fi
+}
+
+# Update services based on Keepalived state
+update_services() {
+    reload_odhcpd=false
+    reload_natmap=false
+
+    case "$ACTION" in
+        NOTIFY_MASTER)
+            # Enable DHCPv4 if not already enabled
+            check_and_update "dhcp.lan.ignore" "0"
+            # Enable natmap and DHCPv6 settings
+            check_and_update "natmap.@global[0].enable" "1" && reload_natmap=true
+            check_and_update "dhcp.lan.dhcpv6" "server" && reload_odhcpd=true
+            check_and_update "dhcp.lan.ra" "server" && reload_odhcpd=true
+            check_and_update "dhcp.lan.ndp" "relay" && reload_odhcpd=true
+            ;;
+        NOTIFY_BACKUP)
+            # Disable DHCPv4 if not already disabled
+            check_and_update "dhcp.lan.ignore" "1"
+            # Disable natmap and DHCPv6 settings
+            check_and_update "natmap.@global[0].enable" "0" && reload_natmap=true
+            check_and_update "dhcp.lan.dhcpv6" "disabled" && reload_odhcpd=true
+            check_and_update "dhcp.lan.ra" "disabled" && reload_odhcpd=true
+            check_and_update "dhcp.lan.ndp" "disabled" && reload_odhcpd=true
+            ;;
+        *)
+            logger -t keepalived "ACTION: $ACTION"
+            return
+            ;;
+    esac
+
+    # Apply necessary actions
+    reload_odhcpd_if_needed "$reload_odhcpd"
+    reload_natmap_if_needed "$reload_natmap"
+}
+
+# Main script execution
+update_services
+
+logger -t keepalived "Hotplug script for others triggered with ACTION=$ACTION"
+
+keepalived_hotplug
+logger -t keepalived "Hotplug script for others completed"
