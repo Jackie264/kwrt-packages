@@ -3,7 +3,7 @@
 # shellcheck source=/dev/null
 . /lib/functions/keepalived/hotplug.sh
 
-set_service_name 521-other
+set_service_name others
 
 logger -t keepalived "Running other_service_check at $(date)"
 
