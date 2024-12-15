@@ -93,4 +93,5 @@ logger -t keepalived "Hotplug script for others triggered with ACTION=$ACTION"
 add_sync_file /tmp/dhcp.leases
 
 keepalived_hotplug
+
 logger -t keepalived "Hotplug script for others completed"
