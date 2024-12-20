@@ -522,6 +522,23 @@ return view.extend({
 		o.depends('refresh', '1');
 		o.modalonly = true;
 
+		// New keywords input module
+		o = s.taboption('forward', form.Value, 'clt_keywords', _('Keywords'));
+		o.placeholder = _('Enter a valid domain name, e.g., www.abc.com');
+		o.datatype = "hostname";
+		o.rmempty = true;
+		o.retain = true;
+		o.depends('refresh', '1');
+		o.modalonly = true;
+
+		// Custom validation for domain name
+		o.validate = function (section_id, value) {
+			if (!value || value.match(/^(?!\-)([a-zA-Z0-9\-]{1,63}(?<!\-)\.)+[a-zA-Z]{2,}$/)) {
+				return true; // Valid domain name or empty value
+			}
+			return _('Invalid domain name. Please enter a valid domain, e.g., www.abc.com');
+		};
+		
 		o = s.option(form.DummyValue, '_external_ip', _('External IP'));
 		o.modalonly = false;
 		o.textvalue = function(section_id) {
