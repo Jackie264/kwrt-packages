@@ -7,6 +7,24 @@ set_service_name others
 
 logger -t keepalived "Running other_service_check at $(date)"
 
+# Check if cloudflared is installed
+check_cloudflared_installed() {
+	if ! command -v cloudflared &>/dev/null; then
+		logger -t keepalived "cloudflared service is not installed, skipping cloudflared control"
+		return 1
+	fi
+	return 0
+}
+
+# Reload cloudflared if necessary
+reload_cloudflared_if_needed() {
+	if [ "$1" = true ]; then
+		if check_cloudflared_installed; then
+			/etc/init.d/cloudflared reload || logger -t keepalived "Failed to reload cloudflared"
+		fi
+	fi
+}
+
 # Check if natmap is installed
 check_natmap_installed() {
     if ! command -v natmap &>/dev/null; then
@@ -14,13 +32,6 @@ check_natmap_installed() {
         return 1
     fi
     return 0
-}
-
-# Reload odhcpd if necessary
-reload_odhcpd_if_needed() {
-    if [ "$1" = true ]; then
-        /etc/init.d/odhcpd reload || logger -t keepalived "Failed to reload odhcpd"
-    fi
 }
 
 # Reload natmap if necessary
@@ -32,13 +43,20 @@ reload_natmap_if_needed() {
     fi
 }
 
+# Reload odhcpd if necessary
+reload_odhcpd_if_needed() {
+    if [ "$1" = true ]; then
+        /etc/init.d/odhcpd reload || logger -t keepalived "Failed to reload odhcpd"
+    fi
+}
+
 # Check and update UCI settings
 check_and_update() {
     local config_key=$1
     local target_value=$2
     local current_value
-    current_value=$(uci get "$config_key" 2>/dev/null)
 
+    current_value=$(uci get "$config_key" 2>/dev/null)
     if [ "$current_value" = "$target_value" ]; then
         return 1
     else
@@ -55,12 +73,14 @@ check_and_update() {
 update_services() {
     reload_odhcpd=false
     reload_natmap=false
+	reload_cloudflared=false
 
     case "$ACTION" in
         NOTIFY_MASTER)
             # Enable DHCPv4 if not already enabled
             check_and_update "dhcp.lan.ignore" "0"
-            # Enable natmap and DHCPv6 settings
+			# Enable natmap, cloudflared, and DHCPv6 settings
+			check_and_update "cloudflared.config.enabled" "1" && reload_cloudflared=true
             check_and_update "natmap.@global[0].enable" "1" && reload_natmap=true
             check_and_update "dhcp.lan.dhcpv6" "server" && reload_odhcpd=true
             check_and_update "dhcp.lan.ra" "server" && reload_odhcpd=true
@@ -69,7 +89,8 @@ update_services() {
         NOTIFY_BACKUP)
             # Disable DHCPv4 if not already disabled
             check_and_update "dhcp.lan.ignore" "1"
-            # Disable natmap and DHCPv6 settings
+			# Disable natmap, cloudflared, and DHCPv6 settings
+			check_and_update "cloudflared.config.enabled" "0" && reload_cloudflared=true
             check_and_update "natmap.@global[0].enable" "0" && reload_natmap=true
             check_and_update "dhcp.lan.dhcpv6" "disabled" && reload_odhcpd=true
             check_and_update "dhcp.lan.ra" "disabled" && reload_odhcpd=true
@@ -84,6 +105,7 @@ update_services() {
     # Apply necessary actions
     reload_odhcpd_if_needed "$reload_odhcpd"
     reload_natmap_if_needed "$reload_natmap"
+	reload_cloudflared_if_needed "$reload_cloudflared"
 }
 
 # Main script execution
